@@ -1,0 +1,68 @@
+services:
+  elasticsearch:
+    image: elasticsearch:8.13.4
+    container_name: elasticsearch
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+      - cluster.name=elasticsearch
+      - xpack.security.enabled=false
+    networks:
+      - backend-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+
+  postgres:
+    image: postgres:16.3
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - backend-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+
+  backend:
+    build: ./backend
+    container_name: backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/postgres
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_ELASTICSEARCH_URIS: http://elasticsearch:9200
+    networks:
+      - backend-network
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - backend-network
+
+networks:
+  backend-network:
+    driver: bridge
