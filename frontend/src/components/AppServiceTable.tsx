@@ -22,7 +22,7 @@ const AppServiceTable: React.FC<AppServiceTableProps> = ({ data }) => {
 
         return (
           <div key={index} className="mb-4">
-            <h5>Services found by application:</h5>
+            <h5>Found by the following application:</h5>
             <ul>
               <li key={item.applicationName}>{item.applicationName}</li>
             </ul>

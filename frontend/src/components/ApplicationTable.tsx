@@ -33,7 +33,7 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({ data }) => {
         return (
           <div key={index} className="mb-4">
             <h5>
-              Application found by service(s):
+              Found by the following service(s):
             </h5>
             <ul>
               {item.serviceNames.map((serviceName, idx) => (
